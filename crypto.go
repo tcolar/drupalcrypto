@@ -2,10 +2,10 @@
 
 package drupalcrypto
 
-import(
-  "log"
+import (
   "encoding/base64"
   "errors"
+  "log"
   "math"
   "strings"
 )
@@ -13,29 +13,29 @@ import(
 type PhpCrypto struct {
   Scramble1 string
   Scramble2 string
-  Adj float64
-  Mod int
+  Adj       float64
+  Mod       int
 }
 
 // Get a Crypto instance initialized as it is in Drupal / Ubbercart
-func DrupalCrypto() (crypto PhpCrypto){
+func DrupalCrypto() (crypto PhpCrypto) {
   return PhpCrypto{
-    Scramble1 : "! #$%&()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`\"abcdefghijklmnopqrstuvwxyz{|}~",
-    Scramble2 : "f^jAE]okIOzU[2&q1{3`h5w_794p@6s8?BgP>dFV=m\" D<TcS%Ze|r:lGK/uCy.Jx)HiQ!#$~(;Lt-R}Ma,NvW+Ynb*0X",
-    Adj : 1.75,
-    Mod : 3,
+    Scramble1: "! #$%&()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`\"abcdefghijklmnopqrstuvwxyz{|}~",
+    Scramble2: "f^jAE]okIOzU[2&q1{3`h5w_794p@6s8?BgP>dFV=m\" D<TcS%Ze|r:lGK/uCy.Jx)HiQ!#$~(;Lt-R}Ma,NvW+Ynb*0X",
+    Adj:       1.75,
+    Mod:       3,
   }
 }
 
 // This is how some Drupal data is encrypted (convert to b64 first)
-func(crypto PhpCrypto) B64Crypt(data string, encKey string) (result string, err error){
+func (crypto PhpCrypto) B64Crypt(data string, encKey string) (result string, err error) {
   // First to base64
   bytes := []byte(data)
   b64 := base64.StdEncoding.EncodeToString(bytes)
   return crypto.Crypt(b64, encKey)
 }
 
-func(crypto PhpCrypto) Crypt(data string, encKey string) (result string, err error){
+func (crypto PhpCrypto) Crypt(data string, encKey string) (result string, err error) {
 
   var fudgefactor []float64
   fudgefactor, err = crypto.convertKey(encKey)
@@ -61,7 +61,7 @@ func(crypto PhpCrypto) Crypt(data string, encKey string) (result string, err err
     //log.Printf("%d num2", num2)
     factor2 = factor1 + float64(num2)
 
-    char2 := crypto.Scramble2[num2 : num2 + 1]
+    char2 := crypto.Scramble2[num2 : num2+1]
     result += char2
   }
 
@@ -69,7 +69,7 @@ func(crypto PhpCrypto) Crypt(data string, encKey string) (result string, err err
 }
 
 // This is how some Drupal data is encrypted
-func(crypto PhpCrypto) B64Decrypt(data string, encKey string) (result string, err error){
+func (crypto PhpCrypto) B64Decrypt(data string, encKey string) (result string, err error) {
   str, err := crypto.Decrypt(data, encKey)
   if err != nil {
     return result, err
@@ -79,7 +79,7 @@ func(crypto PhpCrypto) B64Decrypt(data string, encKey string) (result string, er
   return string(decoded), err
 }
 
-func(crypto PhpCrypto) Decrypt(data string, encKey string) (result string, err error){
+func (crypto PhpCrypto) Decrypt(data string, encKey string) (result string, err error) {
   // Convert key into sequence of numbers
   if len(data) == 0 {
     return result, errors.New("No data supplied.")
@@ -106,20 +106,20 @@ func(crypto PhpCrypto) Decrypt(data string, encKey string) (result string, err e
     num1 = crypto.checkRange(num1)
     factor2 = factor1 + float64(num2)
 
-    char1 := crypto.Scramble1[num1 : num1 + 1]
+    char1 := crypto.Scramble1[num1 : num1+1]
     result += char1
   }
 
   return result, err
 }
 
-func(crypto PhpCrypto) convertKey(key string) (result []float64, err error) {
+func (crypto PhpCrypto) convertKey(key string) (result []float64, err error) {
   result = append(result, float64(len(key)))
   tot := 0.0
 
-  for _, c := range key{
+  for _, c := range key {
     num := strings.IndexRune(crypto.Scramble1, c)
-    if num <  0 {
+    if num < 0 {
       return result, errors.New("Key contains an invalid character : " + string(c))
     }
     result = append(result, float64(num))
@@ -130,22 +130,22 @@ func(crypto PhpCrypto) convertKey(key string) (result []float64, err error) {
   return result, err
 }
 
-func(crypto PhpCrypto) applyFudgeFactor(fudgefactor *[]float64) (fudge float64) {
+func (crypto PhpCrypto) applyFudgeFactor(fudgefactor *[]float64) (fudge float64) {
   f := *fudgefactor
-  fudge = f[0] // take first element
+  fudge = f[0]         // take first element
   *fudgefactor = f[1:] // remove it from array
 
   fudge += crypto.Adj
   *fudgefactor = append(*fudgefactor, fudge)
 
-  if int(fudge) % crypto.Mod == 0 {
+  if int(fudge)%crypto.Mod == 0 {
     fudge *= -1
   }
 
   return fudge
 }
 
-func(crypto PhpCrypto) checkRange(input int) (num int) {
+func (crypto PhpCrypto) checkRange(input int) (num int) {
   num = input
   //num = Rounded(num, 0)
   limit := len(crypto.Scramble1)
@@ -171,4 +171,3 @@ func Rounded(val float64, decimals int) (rounded float64) {
   }
   return rounder / pow
 }
-
