@@ -5,7 +5,7 @@ package drupalcrypto
 import (
 	"encoding/base64"
 	"errors"
-	"log"
+	//"log"
 	"math"
 	"strings"
 )
@@ -47,7 +47,7 @@ func (crypto PhpCrypto) Crypt(data string, encKey string) (result string, err er
 
 	for _, c := range data {
 		c1 := string(c)
-		num1 := strings.Index(crypto.Scramble1, c1)
+		num1 := strings.IndexRune(crypto.Scramble1, c)
 		if num1 < 0 {
 			return result, errors.New("Source string contains an invalid character : " + c1)
 		}
@@ -63,8 +63,8 @@ func (crypto PhpCrypto) Crypt(data string, encKey string) (result string, err er
 
 		char2 := crypto.Scramble2[num2 : num2+1]
 		result += char2
+		//log.Print(result)
 	}
-
 	return result, err
 }
 
@@ -74,7 +74,7 @@ func (crypto PhpCrypto) B64Decrypt(data string, encKey string) (result string, e
 	if err != nil {
 		return result, err
 	}
-	log.Print(str)
+	//log.Print(str)
 	decoded, err := base64.StdEncoding.DecodeString(str)
 	return string(decoded), err
 }

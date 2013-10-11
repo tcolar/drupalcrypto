@@ -101,6 +101,7 @@ class uc_encryption_class {
 
     for ($i = 0; $i < strlen($source); $i++) {
       $char1 = substr($source, $i, 1);
+      echo($char1 . "\n");
 
       $num1 = strpos(self::$scramble1, $char1);
       if ($num1 === FALSE) {
@@ -258,7 +259,10 @@ $enc = new uc_encryption_class();
 $b64 = base64_encode('a:9:{s:7:"cc_type";s:10:"Mastercard";s:8:"cc_owner";s:0:"";s:9:"cc_number";s:4:"6441";s:14:"cc_start_month";s:0:"";s:13:"cc_start_year";s:0:"";s:12:"cc_exp_month";s:1:"8";s:11:"cc_exp_year";s:4:"2016";s:8:"cc_issue";s:0:"";s:7:"cc_bank";s:0:"";}');
 echo($b64);echo("\n");
 $result = $enc->encrypt("111222333dddccccc122456789abcdef", $b64);
+
 var_dump($result);
+
+
 
 
 
